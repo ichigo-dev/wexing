@@ -4,7 +4,7 @@
 
 */
 
-mod error;
+pub mod error;
 
 use crate::util::{ sleep_ms, AtomicCounter };
 use crate::threadpool::error::*;

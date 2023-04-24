@@ -1,3 +1,9 @@
+/*
+
+    ThreadPool Errors
+
+*/
+
 use core::fmt::{ Debug, Display, Formatter };
 use std::error::Error;
 use std::io::ErrorKind;

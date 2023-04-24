@@ -38,7 +38,7 @@ pub struct Mutex<T>
 impl<T> Mutex<T>
 {
     //--------------------------------------------------------------------------
-    //  Create a new `Mutex`.
+    //  Creates a new `Mutex`.
     //--------------------------------------------------------------------------
     pub fn new( value: T ) -> Mutex<T>
     {
@@ -57,7 +57,7 @@ impl<T> Mutex<T>
     }
 
     //--------------------------------------------------------------------------
-    //  Lock the value and get `MutexGuard`.
+    //  Locks the value and get `MutexGuard`.
     //--------------------------------------------------------------------------
     pub async fn lock( &self ) -> MutexGuard<'_, T>
     {
@@ -82,7 +82,7 @@ pub struct MutexGuard<'a, T>
 impl<'a, T> MutexGuard<'a, T>
 {
     //--------------------------------------------------------------------------
-    //  Create a new `MutexGuard`.
+    //  Creates a new `MutexGuard`.
     //--------------------------------------------------------------------------
     fn new( mutex: &'a Mutex<T>, value_guard: std::sync::MutexGuard<'a, T> )
         -> MutexGuard<'a, T>
@@ -101,7 +101,7 @@ impl<'a, T> MutexGuard<'a, T>
 impl<'a, T> Drop for MutexGuard<'a, T>
 {
     //--------------------------------------------------------------------------
-    //  When `MutexGuard` is dropped, call `wake()` on any other tasks that
+    //  When `MutexGuard` is dropped, calls `wake()` on any other tasks that
     //  tried to get the lock.
     //--------------------------------------------------------------------------
     fn drop( &mut self )
@@ -126,7 +126,7 @@ impl<'a, T> Deref for MutexGuard<'a, T>
     type Target = T;
 
     //--------------------------------------------------------------------------
-    //  Access the inner value.
+    //  Accesses the inner value.
     //--------------------------------------------------------------------------
     fn deref( &self ) -> &Self::Target
     {
@@ -137,7 +137,7 @@ impl<'a, T> Deref for MutexGuard<'a, T>
 impl<'a, T> DerefMut for MutexGuard<'a, T>
 {
     //--------------------------------------------------------------------------
-    //  Access the inner value.
+    //  Accesses the inner value.
     //--------------------------------------------------------------------------
     fn deref_mut( &mut self ) -> &mut Self::Target
     {
@@ -159,7 +159,8 @@ impl<'a, T> Future for LockFuture<'a, T>
     type Output = MutexGuard<'a, T>;
 
     //--------------------------------------------------------------------------
-    //  Try to get `MutexGuard` and re-polling if the value is already locked.
+    //  Attempts to get `MutexGuard` and re-polling if the value is already
+    //  locked.
     //--------------------------------------------------------------------------
     fn poll( self: Pin<&mut Self>, cx: &mut Context<'_> ) -> Poll<Self::Output>
     {

@@ -16,8 +16,8 @@ use std::task::Waker;
 
 
 //------------------------------------------------------------------------------
-//  Create a channel that can be used to send a single value. Sender is consumed
-//  when it sends a value to the channel.
+//  Creates a channel that can be used to send a single value. Sender is
+//  consumed when it sends a value to the channel.
 //------------------------------------------------------------------------------
 #[must_use]
 pub fn oneshot<T>() -> (OneSender<T>, Receiver<T>)
@@ -46,7 +46,7 @@ where
 }
 
 //------------------------------------------------------------------------------
-//  Create a synchronous, bounded channel.
+//  Creates a synchronous, bounded channel.
 //------------------------------------------------------------------------------
 #[must_use]
 pub fn sync_channel<T>( bound: usize ) -> (SyncSender<T>, Receiver<T>)
@@ -103,7 +103,7 @@ pub struct OneSender<T: Send>
 impl<T: Send> OneSender<T>
 {
     //--------------------------------------------------------------------------
-    //  Consume self by sending a value to a channel and calls `wake()` a task
+    //  Consumes self by sending a value to a channel and calls `wake()` a task
     //  waiting for the `Receiver` to receive the value.
     //--------------------------------------------------------------------------
     pub fn send( mut self, value: T ) -> Result<(), SendError<T>>
@@ -155,8 +155,8 @@ pub struct SyncSender<T: Send>
 impl<T: Send + Clone> SyncSender<T>
 {
     //--------------------------------------------------------------------------
-    //  Try to send a message and reschedule the task if the channel queue is
-    //  full.
+    //  Attempts to send a message and reschedules the task if the channel
+    //  queue is full.
     //--------------------------------------------------------------------------
     pub async fn async_send( &self, value: T ) -> Result<(), SendError<T>>
     {
@@ -176,7 +176,7 @@ impl<T: Send + Clone> SyncSender<T>
 impl<T: Send> SyncSender<T>
 {
     //--------------------------------------------------------------------------
-    //  Wake the receiver.
+    //  Wakes the receiver.
     //--------------------------------------------------------------------------
     fn wake_receiver( &self )
     {
@@ -188,7 +188,7 @@ impl<T: Send> SyncSender<T>
     }
 
     //--------------------------------------------------------------------------
-    //  Wake the receiver if the result is `Ok` .
+    //  Wakes the receiver if the result is `Ok` .
     //--------------------------------------------------------------------------
     fn wake_receiver_if_ok<E>( &self, result: Result<(), E> ) -> Result<(), E>
     {
@@ -200,7 +200,7 @@ impl<T: Send> SyncSender<T>
     }
 
     //--------------------------------------------------------------------------
-    //  Send a message to the channel queue.
+    //  Sends a message to the channel queue.
     //--------------------------------------------------------------------------
     pub fn send( &self, value: T ) -> Result<(), SendError<T>>
     {
@@ -208,7 +208,7 @@ impl<T: Send> SyncSender<T>
     }
 
     //--------------------------------------------------------------------------
-    //  Try to send a message to the channel queue.
+    //  Attempts to send a message to the channel queue.
     //--------------------------------------------------------------------------
     pub fn try_send( &self, value: T ) -> Result<(), TrySendError<T>>
     {
@@ -220,7 +220,7 @@ impl<T: Send> Drop for SyncSender<T>
 {
     //--------------------------------------------------------------------------
     //  If only this sender and the receiver refer to `Inner` (This means the
-    //  last sender will be dropped), wake up the receiver.
+    //  last sender will be dropped), wakes up the receiver.
     //--------------------------------------------------------------------------
     fn drop( &mut self )
     {
@@ -272,7 +272,7 @@ impl<T: Send> Future for SendFuture<T>
     type Output = Result<(), SendError<T>>;
 
     //--------------------------------------------------------------------------
-    //  Try to send a message and re-polling if the queue is full.
+    //  Attempts to send a message and reschedules if the queue is full.
     //--------------------------------------------------------------------------
     fn poll( self: Pin<&mut Self>, cx: &mut Context<'_> ) -> Poll<Self::Output>
     {
@@ -310,7 +310,7 @@ where
 impl<T: Send> Receiver<T>
 {
     //--------------------------------------------------------------------------
-    //  Wake senders.
+    //  Wakes senders.
     //--------------------------------------------------------------------------
     fn wake_senders( &self )
     {
@@ -326,7 +326,7 @@ impl<T: Send> Receiver<T>
     }
 
     //--------------------------------------------------------------------------
-    //  Wake senders if the result is `Ok` .
+    //  Wakes senders if the result is `Ok` .
     //--------------------------------------------------------------------------
     fn wake_senders_if_ok<E>( &self, result: Result<T, E> ) -> Result<T, E>
     {
@@ -338,8 +338,8 @@ impl<T: Send> Receiver<T>
     }
 
     //--------------------------------------------------------------------------
-    //  Try to receive a message and reschedule the task if the channel queue is
-    //  empty.
+    //  Attempts to receive a message and reschedules the task if the channel
+    //  queue is empty.
     //--------------------------------------------------------------------------
     async fn async_recv( &mut self ) -> Result<T, std::sync::mpsc::RecvError>
     {
@@ -347,7 +347,7 @@ impl<T: Send> Receiver<T>
     }
 
     //--------------------------------------------------------------------------
-    //  Receive a message from the channel queue.
+    //  Receives a message from the channel queue.
     //--------------------------------------------------------------------------
     pub fn recv( &self ) -> Result<T, std::sync::mpsc::RecvError>
     {
@@ -355,7 +355,7 @@ impl<T: Send> Receiver<T>
     }
 
     //--------------------------------------------------------------------------
-    //  Try to receive a message to the channel queue.
+    //  Attempts to receive a message to the channel queue.
     //--------------------------------------------------------------------------
     pub fn try_recv( &self ) -> Result<T, std::sync::mpsc::TryRecvError>
     {
@@ -419,7 +419,7 @@ impl<T: Send> Receiver<T>
     }
 
     //--------------------------------------------------------------------------
-    //  Create an iterator that retrieves messages that can be received.
+    //  Creates an iterator that retrieves messages that can be received.
     //--------------------------------------------------------------------------
     pub fn iter( &self ) -> Iter<'_, T>
     {
@@ -427,7 +427,8 @@ impl<T: Send> Receiver<T>
     }
 
     //--------------------------------------------------------------------------
-    //  Try to create an iterator that retrieves messages that can be received.
+    //  Attempts to create an iterator that retrieves messages that can be
+    //  received.
     //--------------------------------------------------------------------------
     pub fn try_iter( &self ) -> TryIter<'_, T>
     {
@@ -438,7 +439,7 @@ impl<T: Send> Receiver<T>
 impl<T: Send> Drop for Receiver<T>
 {
     //--------------------------------------------------------------------------
-    //  Wake senders when dropped.
+    //  Wakes senders when dropped.
     //--------------------------------------------------------------------------
     fn drop( &mut self )
     {
@@ -460,10 +461,10 @@ impl<T: Send> Future for Receiver<T>
     type Output = Result<T, std::sync::mpsc::RecvError>;
 
     //--------------------------------------------------------------------------
-    //  If it is possible to receive from the channel queue, receive the value
-    //  and wake the sender.
+    //  If it is possible to receive from the channel queue, receives the value
+    //  and wakes the sender.
     //
-    //  If the channel queue is empty, reschedule the task.
+    //  If the channel queue is empty, reschedules the task.
     //--------------------------------------------------------------------------
     fn poll( self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output>
     {
@@ -551,9 +552,6 @@ impl<'a, T: Send> Iterator for Iter<'a, T>
 {
     type Item = T;
 
-    //--------------------------------------------------------------------------
-    //  Call `recv()` on the inner `Receiver` .
-    //--------------------------------------------------------------------------
     fn next( &mut self ) -> Option<T>
     {
         self.rx.recv().ok()
@@ -570,9 +568,6 @@ impl<T: Send> Iterator for IntoIter<T>
 {
     type Item = T;
 
-    //--------------------------------------------------------------------------
-    //  Call `recv()` on the inner `Receiver` .
-    //--------------------------------------------------------------------------
     fn next( &mut self ) -> Option<T>
     {
         self.rx.recv().ok()
@@ -588,9 +583,6 @@ impl<'a, T: Send> Iterator for TryIter<'a, T>
 {
     type Item = T;
 
-    //--------------------------------------------------------------------------
-    //  Call `try_recv()` on the inner `Receiver` .
-    //--------------------------------------------------------------------------
     fn next( &mut self ) -> Option<T>
     {
         self.rx.try_recv().ok()

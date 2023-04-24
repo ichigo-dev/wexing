@@ -159,8 +159,7 @@ impl<'a, T> Future for LockFuture<'a, T>
     type Output = MutexGuard<'a, T>;
 
     //--------------------------------------------------------------------------
-    //  Attempt to acquire `MutexGuard` and re-polling if the value is already
-    //  locked.
+    //  Try to get `MutexGuard` and re-polling if the value is already locked.
     //--------------------------------------------------------------------------
     fn poll( self: Pin<&mut Self>, cx: &mut Context<'_> ) -> Poll<Self::Output>
     {

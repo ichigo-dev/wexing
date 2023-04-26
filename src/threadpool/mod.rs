@@ -7,7 +7,7 @@
 pub mod error;
 
 use crate::util::{ sleep_ms, AtomicCounter };
-use crate::threadpool::error::*;
+use error::*;
 
 use core::fmt::{ Debug, Formatter };
 use core::time::Duration;

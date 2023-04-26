@@ -373,3 +373,45 @@ fn poll_task( task: SpawnedTask, executor: Weak<Executor> )
         }
     }
 }
+
+
+//------------------------------------------------------------------------------
+//  Tests
+//------------------------------------------------------------------------------
+#[cfg(test)]
+mod tests
+{
+    use crate::executor;
+
+    #[test]
+    fn executor_spawn()
+    {
+        let executor = executor::Executor::default();
+        let (sender, receiver) = std::sync::mpsc::channel();
+        executor.spawn(async move
+        {
+            sender.send("Hello, world").unwrap();
+        });
+        assert_eq!(receiver.recv().unwrap(), "Hello, world");
+    }
+
+    #[test]
+    fn executor_block_on()
+    {
+        async fn hello() -> &'static str
+        {
+            return "Hello";
+        }
+
+        async fn world() -> &'static str
+        {
+            return "World";
+        }
+
+        executor::block_on(async
+        {
+            assert_eq!(hello().await, "Hello");
+            assert_eq!(world().await, "World");
+        });
+    }
+}

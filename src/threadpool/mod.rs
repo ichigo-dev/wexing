@@ -1,6 +1,32 @@
 /*
 
-    ThreadPool
+    ThreadPool to handle multithreaded scheduled tasks.
+
+
+    ```rust
+    type ProcessResult = ();
+    fn process_data
+    (
+        data: (),
+        sender: std::sync::mpsc::Sender<ProcessResult>
+    ) -> ProcessResult
+    {
+        sender.send(()).unwrap();
+    }
+
+    let data_source = vec![(), (), ()];
+    let pool = wexing::threadpool::ThreadPool::new("worker", 2).unwrap();
+    let receiver =
+    {
+        let (sender, receiver) = std::sync::mpsc::channel();
+        for data in data_souce
+        {
+            let sender_clone = sender.clone();
+            pool.schedule(move || process_data(data, sender_clone));
+        }
+    };
+    let result: Vec<ProcessResult> = receiver.iter().collect();
+    ```
 
 */
 

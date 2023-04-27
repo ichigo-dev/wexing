@@ -1,8 +1,52 @@
 /*
 
-    Async Executor
-
     A safe async runtime.
+
+
+    ```rust
+    let executor = wexing::executor::Executor::default();
+    let (sender, receiver) = std::sync::mpsc::channel();
+    executor.spawn(async move
+    {
+        sender.send(()).unwrap();
+    });
+    receiver.recv().unwrap();
+    ```
+
+    ```rust
+    async fn prepare_request() -> Result<(), std::io::Error> { OK(()) }
+    async fn execute_request() -> Result<(), std::io::Error> { OK(()) }
+
+    fn f() -> Result<(), std::io::Error>
+    {
+        let result = wexing::executor::block_on(async
+        {
+            prepare_request().await?;
+            execute_request().await
+        })?;
+        Ok(())
+    }
+
+    f().unwrap();
+    ```
+
+    ```rust
+    fn read_file1() -> Result<(), std::io::Error> { Ok(()) }
+    fn read_file2() -> Result<(), std::io::Error> { Ok(()) }
+
+    async fn f() -> Result<(), std::io::Error>
+    {
+        let result = wexing::executor::schedule_blocking(||
+        {
+            read_file1()?;
+            read_file1()
+        }).async_recv().await.unwrap()?;
+        Ok(())
+    }
+
+    let executor = wexing::executor::Executor::default();
+    executor.block_on(f()).unwrap();
+    ```
 
 */
 
@@ -22,7 +66,7 @@ type SpawnedTask =
 
 
 //------------------------------------------------------------------------------
-//  Thread local executor
+//  Thread local executor.
 //------------------------------------------------------------------------------
 thread_local!
 {

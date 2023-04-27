@@ -1,18 +1,13 @@
 /*
 
-    ThreadPool Errors
+    Errors for ThreadPool.
 
 */
 
+use crate::util::err_eq;
 use core::fmt::{ Debug, Display, Formatter };
 use std::error::Error;
 use std::io::ErrorKind;
-
-
-fn err_eq( a: &std::io::Error, b: &std::io::Error ) -> bool
-{
-    a.kind() == b.kind() && format!("{}", a) == format!("{}", b)
-}
 
 
 //------------------------------------------------------------------------------

@@ -1,6 +1,6 @@
 /*
 
-    Async Channel
+    Asynchronous support for standard library channel.
 
 */
 

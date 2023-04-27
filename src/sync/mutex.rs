@@ -1,6 +1,6 @@
 /*
 
-    Async Mutex
+    Asynchronous support for standard library mutex.
 
 */
 

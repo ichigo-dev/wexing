@@ -341,7 +341,7 @@ impl<T: Send> Receiver<T>
     //  Attempts to receive a message and reschedules the task if the channel
     //  queue is empty.
     //--------------------------------------------------------------------------
-    async fn async_recv( &mut self ) -> Result<T, std::sync::mpsc::RecvError>
+    pub async fn async_recv( &mut self ) -> Result<T, std::sync::mpsc::RecvError>
     {
         self.await
     }

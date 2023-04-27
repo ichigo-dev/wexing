@@ -62,7 +62,7 @@ impl TcpStream
         addr: A,
     ) -> Result<Self, std::io::Error>
     {
-        crate::executor::schedule_blocking(move ||
+        crate::schedule_blocking(move ||
         {
             TcpStream::new(std::net::TcpStream::connect(addr)?)
         })
@@ -80,7 +80,7 @@ impl TcpStream
     //--------------------------------------------------------------------------
     pub async fn read
     (
-        mut self,
+        &mut self,
         buf: &mut [u8],
     ) -> Result<usize, std::io::Error>
     {

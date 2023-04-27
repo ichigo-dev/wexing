@@ -9,3 +9,5 @@ pub mod net;
 
 pub mod threadpool;
 pub mod executor;
+
+pub use executor::*;

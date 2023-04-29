@@ -77,7 +77,7 @@ mod test
     #[test]
     fn threadpool()
     {
-        let mut tp = ThreadPool::new("wexing", 10);
+        let tp = ThreadPool::new("wexing", 10);
         tp.run().unwrap();
         assert_eq!(tp.num_live_threads(), 10);
 

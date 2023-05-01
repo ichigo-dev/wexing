@@ -4,17 +4,23 @@
 
 */
 
-use crate::threadpool::{ Task, ThreadPool };
+mod task;
 
-use core::pin::Pin;
-use core::task::Poll;
+use crate::threadpool::ThreadPool;
+use task::Task;
+
+use std::task::Poll;
+use std::pin::Pin;
+use std::marker::Unpin;
 use std::future::Future;
-use std::sync::{ Arc, Mutex };
-use std::sync::mpsc::{ self, SyncSender };
+use std::sync::mpsc::{ self, Sender, Receiver };
+
 
 pub struct Executor
 {
     pool: ThreadPool,
+    task_sender: Sender<Task>,
+    task_queue: Receiver<Task>,
 }
 
 impl Executor
@@ -24,56 +30,53 @@ impl Executor
     //--------------------------------------------------------------------------
     pub fn new() -> Self
     {
+        let (sender, receiver) = mpsc::channel();
         Self
         {
             pool: ThreadPool::new("wexing", 4),
+            task_sender: sender,
+            task_queue: receiver,
         }
     }
 
-    pub fn run( &self ) -> Result<(), std::io::Error>
-    {
-        self.pool.run()
-    }
-
-    pub fn schedule
+    //--------------------------------------------------------------------------
+    //  Spawns a task and schedule it.
+    //--------------------------------------------------------------------------
+    pub fn spawn
     (
         &self,
-        mut fut: impl (Future<Output=()>) + Send + Unpin + 'static + Sync,
+        fut: impl Future<Output = ()> + Send + Unpin + 'static
     )
     {
-        struct TaskWaker(Mutex<Option<SyncSender<()>>>);
-        impl std::task::Wake for TaskWaker
-        {
-            fn wake( self: Arc<Self> )
-            {
-                if let Some(sender) = self.0.lock().unwrap().take()
-                {
-                    let _ = sender.send(());
-                }
-            }
-        }
-
         let task = Task::new
         (
-            Box::new(move ||
-            {
-                loop
-                {
-                    let (sender, receiver) = mpsc::sync_channel(1);
-                    let waker = std::task::Waker::from(Arc::new(TaskWaker(Mutex::new(Some(sender)))));
-                    let mut cx = std::task::Context::from_waker(&waker);
-
-                    match Pin::new(&mut fut).poll(&mut cx)
-                    {
-                        Poll::Ready(_) => return,
-                        _ => return,
-                    }
-                    receiver.recv().unwrap();
-                }
-            }),
-            0
+            Pin::new(Box::new(fut)), self.task_sender.clone(),
         );
-        self.pool.schedule(task);
+        self.schedule(task);
+    }
+
+    //--------------------------------------------------------------------------
+    //  Schedules a task.
+    //--------------------------------------------------------------------------
+    pub fn schedule( &self, task: Task )
+    {
+        self.task_sender.send(task).unwrap();
+    }
+
+    //--------------------------------------------------------------------------
+    //  Executes receive task.
+    //--------------------------------------------------------------------------
+    pub fn run( self )
+    {
+        loop
+        {
+            let mut task = self.task_queue.recv().unwrap();
+            match task.poll()
+            {
+                Poll::Pending => { self.schedule(task) },
+                Poll::Ready(()) => {},
+            }
+        }
     }
 }
 
@@ -97,7 +100,7 @@ mod test
         {
             type Output = ();
 
-            fn poll(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output>
+            fn poll(mut self: Pin<&mut Self>, _cx: &mut Context<'_>) -> Poll<Self::Output>
             {
                 if self.state == 0
                 {
@@ -125,10 +128,10 @@ mod test
         }
 
         let executor = Executor::new();
+        executor.spawn(TestFuture { state: 0 });
+        executor.spawn(TestFuture { state: 0 });
+        executor.spawn(TestFuture { state: 0 });
+        executor.spawn(TestFuture { state: 0 });
         executor.run();
-        executor.schedule(TestFuture { state: 0 });
-        executor.schedule(TestFuture { state: 0 });
-        executor.schedule(TestFuture { state: 0 });
-        executor.schedule(TestFuture { state: 0 });
     }
 }

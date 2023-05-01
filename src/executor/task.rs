@@ -34,8 +34,8 @@ impl Task
     pub fn poll( &mut self ) -> Poll<()>
     {
         let waker = dummy_waker();
-        let mut ctx = Context::from_waker(&waker);
-        Future::poll(self.future.as_mut(), &mut ctx)
+        let mut cx = Context::from_waker(&waker);
+        Future::poll(self.future.as_mut(), &mut cx)
     }
 }
 

@@ -1,19 +1,21 @@
 use crate::task::Task;
-use crate::queue::Receiver;
+use crate::queue::{ Sender, Receiver };
 
 pub(crate) struct Worker
 {
     queue: Vec<Task>,
+    sender: Sender<Task>,
     receiver: Receiver<Task>,
 }
 
 impl Worker
 {
-    pub(crate) fn new( receiver: Receiver<Task> ) -> Self
+    pub(crate) fn new( sender: Sender<Task>, receiver: Receiver<Task> ) -> Self
     {
         Self
         {
             queue: Vec::new(),
+            sender,
             receiver,
         }
     }
@@ -24,7 +26,11 @@ impl Worker
         {
             match self.receiver.recv()
             {
-                Some(task) => task.run(),
+                Some(task) =>
+                {
+                    println!("{:?}", std::thread::current().name());
+                    task.run(self.sender.clone())
+                },
                 None =>
                 {
                     std::thread::sleep(std::time::Duration::from_millis(200));

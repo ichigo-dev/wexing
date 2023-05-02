@@ -1,4 +1,4 @@
-use crate::task::Task;
+use crate::task::{ Task, TaskState };
 use crate::worker::Worker;
 use crate::queue::{ self, Sender, Receiver };
 
@@ -24,7 +24,11 @@ impl ThreadPool
         }
     }
 
-    pub(crate) fn spawn( &self, f: impl FnOnce() + Send + 'static )
+    pub(crate) fn spawn
+    (
+        &self,
+        f: impl (FnMut() -> TaskState) + Send + 'static,
+    )
     {
         let task = Task::new(Box::new(f), 0);
         self.sender.send(task);
@@ -56,7 +60,7 @@ impl ThreadPool
             now
         );
 
-        let worker = Worker::new(self.receiver.clone());
+        let worker = Worker::new(self.sender.clone(), self.receiver.clone());
         std::thread::Builder::new()
             .name(thread_name)
             .spawn(move || worker.work())?;

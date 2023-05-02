@@ -1,20 +1,39 @@
+use crate::queue::Sender;
+
+pub(crate) enum TaskState
+{
+    Pending,
+    Done,
+}
+
 pub(crate) struct Task
 {
-    f: Box<dyn FnOnce() + Send>,
+    f: Box<dyn (FnMut() -> TaskState) + Send>,
     priority: usize,
 }
 
 impl Task
 {
-    pub(crate) fn new( f: Box<dyn FnOnce() + Send>, priority: usize ) -> Self
+    pub(crate) fn new
+    (
+        f: Box<dyn (FnMut() -> TaskState) + Send>,
+        priority: usize,
+    ) -> Self
     {
         Self { f, priority }
     }
 
-    pub(crate) fn run( self )
+    pub(crate) fn run( mut self, sender: Sender<Self> )
     {
-        let f = self.f;
-        f();
+        match (self.f)()
+        {
+            TaskState::Pending =>
+            {
+                let task = Self::new(Box::new(self.f), 0);
+                sender.send(task);
+            },
+            TaskState::Done => {},
+        }
     }
 }
 

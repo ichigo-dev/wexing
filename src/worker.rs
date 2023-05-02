@@ -20,7 +20,16 @@ impl Worker
 
     pub(crate) fn work( &self )
     {
-        println!("{:?}", std::thread::current().name());
-        loop {}
+        loop
+        {
+            match self.receiver.recv()
+            {
+                Some(task) => task.run(),
+                None =>
+                {
+                    std::thread::sleep(std::time::Duration::from_millis(200));
+                },
+            }
+        }
     }
 }

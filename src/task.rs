@@ -1,17 +1,20 @@
-#[derive(Eq)]
 pub(crate) struct Task
 {
+    f: Box<dyn FnOnce() + Send>,
     priority: usize,
 }
 
 impl Task
 {
-    pub(crate) fn new() -> Self
+    pub(crate) fn new( f: Box<dyn FnOnce() + Send>, priority: usize ) -> Self
     {
-        Self
-        {
-            priority: 0,
-        }
+        Self { f, priority }
+    }
+
+    pub(crate) fn run( self )
+    {
+        let f = self.f;
+        f();
     }
 }
 
@@ -38,3 +41,5 @@ impl std::cmp::PartialEq for Task
         self.priority == other.priority
     }
 }
+
+impl std::cmp::Eq for Task {}

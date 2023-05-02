@@ -24,6 +24,11 @@ impl Executor
     {
         let _ = self.pool.start_threads();
     }
+
+    fn spawn( &self, f: impl FnOnce() + Send + 'static )
+    {
+        self.pool.spawn(f);
+    }
 }
 
 #[cfg(test)]
@@ -36,6 +41,13 @@ mod test
     {
         let executor = Executor::new(4);
         executor.run();
+        executor.spawn(|| { println!("test"); });
+        executor.spawn(|| { println!("test"); });
+        executor.spawn(|| { println!("test"); });
+        executor.spawn(|| { println!("test"); });
+        executor.spawn(|| { println!("test"); });
+        executor.spawn(|| { println!("test"); });
+        executor.spawn(|| { println!("test"); });
         std::thread::sleep(std::time::Duration::from_secs(1));
     }
 }

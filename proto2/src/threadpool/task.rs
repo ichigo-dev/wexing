@@ -1,6 +1,6 @@
 pub struct Task
 {
-    inner: Box<dyn FnOnce() + Send + Sync>,
+    inner: Box<dyn FnOnce() + Send + 'static>,
     priority: usize,
 }
 
@@ -9,7 +9,7 @@ impl Task
     //--------------------------------------------------------------------------
     //  Creates a task.
     //--------------------------------------------------------------------------
-    pub fn new( f: Box<dyn FnOnce() + Send + Sync>, priority: usize ) -> Self
+    pub fn new( f: Box<dyn FnOnce() + Send + 'static>, priority: usize ) -> Self
     {
         Self
         {

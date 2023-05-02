@@ -1,11 +1,12 @@
 use super::{ Task, LocalTaskQueue };
 
-use std::sync::mpsc::{ Receiver, RecvTimeoutError };
+use std::sync::mpsc::Receiver;
 use std::sync::{ Arc, Mutex };
 use std::time::Duration;
 
 pub(crate) struct Worker
 {
+    inner: Arc<Inner>,
     receiver: Arc<Mutex<Receiver<Task>>>,
     local_queue: Arc<LocalTaskQueue>,
 }
@@ -29,6 +30,8 @@ impl Worker
     //--------------------------------------------------------------------------
     pub(crate) fn work( &self )
     {
+        println!()
+        /*
         loop
         {
             let recv_result = self
@@ -39,10 +42,11 @@ impl Worker
 
             match recv_result
             {
-                Ok(f) => { f.execute(); },
-                Err(RecvTimeoutError::Timeout) => {},
-                Err(RecvTimeoutError::Disconnected) => return,
-            };
+                Ok(f) =>
+                {
+                }
+            }
         }
+        */
     }
 }

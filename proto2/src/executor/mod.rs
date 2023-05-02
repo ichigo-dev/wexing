@@ -6,7 +6,7 @@
 
 mod task;
 
-use crate::threadpool::ThreadPool;
+use crate::threadpool::{ ThreadPool, Task as ThreadPoolTask };
 use task::Task;
 
 use std::task::Poll;
@@ -74,10 +74,12 @@ impl Executor
                 BlockOnTaskWaker(Mutex::new(Some(sender)))
             ));
             let mut cx = std::task::Context::from_waker(&waker);
-            if let Poll::Ready(result) = Pin::new(&mut fut).poll(&mut cx)
-            {
-                return result;
-            }
+            let task = ThreadPoolTask::new(Box::new(|| {Pin::new(&mut fut).poll(&mut cx);}), 0);
+            self.pool.schedule(task);
+//            if let Poll::Ready(result) = Pin::new(&mut fut).poll(&mut cx)
+//            {
+//                return result;
+//            }
             receiver.recv().unwrap();
         }
     }
